@@ -31,25 +31,32 @@ namespace BrowserToWebApp.App_Start
 
         public void ConfigureAuth(IAppBuilder app)
         {
-            app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
-            app.UseCookieAuthentication(new CookieAuthenticationOptions());
+            try
+            {
+                app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
+                app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
-            app.UseOpenIdConnectAuthentication(
-                new OpenIdConnectAuthenticationOptions
-                {
-                    ClientId = clientId,
-                    Authority = authority,
-                    PostLogoutRedirectUri = postLogoutRedirectUrl,
-                    Notifications = new OpenIdConnectAuthenticationNotifications
+                app.UseOpenIdConnectAuthentication(
+                    new OpenIdConnectAuthenticationOptions
                     {
-                        AuthenticationFailed = context =>
+                        ClientId = clientId,
+                        Authority = authority,
+                        PostLogoutRedirectUri = postLogoutRedirectUrl,
+                        Notifications = new OpenIdConnectAuthenticationNotifications
                         {
-                            context.HandleResponse();
-                            context.Response.Redirect("/Error/message=" + context.Exception.Message);
-                            return Task.FromResult(0);
+                            AuthenticationFailed = context =>
+                            {
+                                context.HandleResponse();
+                                context.Response.Redirect("/Error/message=" + context.Exception.Message);
+                                return Task.FromResult(0);
+                            }
                         }
-                    }
-                });
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("ex : " + ex.Message.ToString());
+            }
         }
     }
 }
